@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const width = 10;
     let nextRandom = 0;
     let timerId;
+    let score = 0;
 
     //The Tetrominoes
     const lTetromino = [
@@ -106,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPosition = 4
             draw();
             displayShape();
+            addScore();
+            gameOver();
 
         }
     }
@@ -184,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // add functionality to the button
+    //need to add logic that says if a game has just been lost and you click start, the grid clears to start afresh.
 
     startBtn.addEventListener('click', ()=>{
         if (timerId) { //if the timer is on when the button is clicked then we want to pause the game.
@@ -191,11 +195,37 @@ document.addEventListener('DOMContentLoaded', () => {
             timerId = null;
         } else {
             draw();
-            timerId = setInterval(moveDown, 1000)
+            timerId = setInterval(moveDown, 200)
             nextRandom = Math.floor(Math.random()*theTetrominos.length) // gives a number from 0-4 to determine which tet to start with
             displayShape();//passes the info to the mini-grid to display the upcoming tets.
         }
     })
 
+    //add score 
+    function addScore(){
+        for(let i=0; i<199; i+=width){
+            const row = [i, i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9];
+
+            if(row.every(index => squares[index].classList.contains('taken'))) {
+                score+=10;
+                scoreDisplay.innerHTML = score;
+                row.forEach(index => {
+                    squares[index].classList.remove('taken');
+                    squares[index].classList.remove('tetromino');
+                })
+                const squaresRemoved = squares.splice(i, width);
+                squares = squaresRemoved.concat(squares);
+                squares.forEach(cell => grid.appendChild(cell));
+            }
+        }
+    }
+
+    //game over
+    function gameOver(){
+        if(current.some(index => squares[currentPosition + index].classList.contains('taken'))){
+            scoreDisplay.innerHTML += ` - Sorry, Game Over!`;
+            clearInterval(timerId);
+    }
+}
 
 })
